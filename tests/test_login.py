@@ -1,39 +1,69 @@
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.common.by import By
-# from selenium.webdriver.support.wait import WebDriverWait
-# from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
-# from resources.logger import get_logger
+from resources.logger import get_logger
 from resources.utils import extract_data
-# from resources.exceptions import IncorectLoginData, PageNotLoaded
+from resources.browser import driver
+from resources.exceptions import PageNotLoaded
 
 import pytest
-import time
+import json
 
-@pytest.fixture
-def driver():
-    options = Options()
-    options.add_argument("--headless")
-    with webdriver.Firefox(options=options) as driver:
-        driver.get("http://testarena.pl/demo")
-        yield driver
-        driver.quit()
-
+@pytest.mark.parametrize("driver", ["http://testarena.pl/demo"], indirect=True)
 def test_login(driver):
+    logger = get_logger(__name__)
+
+    logger.info(driver.current_url)
     description = driver.find_element(By.CLASS_NAME, "description")
     items = description.find_elements(By.TAG_NAME, 'p')
     login, password = extract_data(items[0].text)
-    demo_button = items[1].find_element(By.TAG_NAME, 'a')
+    logger.info(f"Login: {login}, Passowrd: {password}")
 
+    demo_button = items[1].find_element(By.TAG_NAME, 'a')
     demo_button.click()
 
-    login_page = driver.switch_to.window(driver.window_handles[1])
-    print(login_page)
-    time.sleep(2)
+    driver.switch_to.window(driver.window_handles[1])
+    try:
+        elem = WebDriverWait(driver, 30).until(
+            EC.presence_of_element_located((By.ID, "email"))
+        )
+    except PageNotLoaded as e:
+        logger.error("Exception occurred: ", e)
 
+    logger.info(driver.current_url)
     email_input = driver.find_element(By.ID, "email")
     email_input.send_keys(login)
     pass_input = driver.find_element(By.ID, "password")
     pass_input.send_keys(password)
     driver.find_element(By.ID, "login").click()
+    
+    logger.info(driver.current_url)
+
+@pytest.mark.parametrize("driver", ["http://demo.testarena.pl/logowanie"], indirect=True)
+def test_login_incorrect_data(driver):
+    logger = get_logger(__name__)
+
+    incorrect_logins_count = 0
+    possible_urls = ["http://demo.testarena.pl/logowanie", "http://demo.testarena.pl/zaloguj"]
+
+    with open("tests/data/login_data.json", "r") as login_data:
+        logins = json.load(login_data)
+        
+    for item in logins:
+        logger.info(driver.current_url)
+        email_input = driver.find_element(By.ID, "email")
+        email_input.send_keys(logins[item]["login"])
+        pass_input = driver.find_element(By.ID, "password")
+        pass_input.send_keys(logins[item]["password"])
+
+        driver.find_element(By.ID, "login").click()
+        flags = driver.find_elements(By.CLASS_NAME, "login_form_error")
+        if len(flags) > 0:
+            incorrect_logins_count += 1
+        
+        assert driver.current_url in possible_urls, "URL has changed unexpectedly"
+
+    assert incorrect_logins_count == len(logins), "Not all tries were successful"

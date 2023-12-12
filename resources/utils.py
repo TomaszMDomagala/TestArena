@@ -1,4 +1,5 @@
 from resources.exceptions import IncorectLoginData
+from random import shuffle
 import re
 
 def extract_data(data: str) -> tuple[str, str]:
