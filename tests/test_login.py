@@ -4,13 +4,17 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
+from faker import Faker
+
 from resources.logger import get_logger
-from resources.utils import extract_data
-from resources.browser import driver
+from resources.utils import extract_data, get_unique_string
+from resources.browser import driver, logged_in_driver
 from resources.exceptions import PageNotLoaded
 
 import pytest
+import time
 import json
+
 
 @pytest.mark.parametrize("driver", ["http://testarena.pl/demo"], indirect=True)
 def test_login(driver):
@@ -27,7 +31,7 @@ def test_login(driver):
 
     driver.switch_to.window(driver.window_handles[1])
     try:
-        elem = WebDriverWait(driver, 30).until(
+        WebDriverWait(driver, 30).until(
             EC.presence_of_element_located((By.ID, "email"))
         )
     except PageNotLoaded as e:
@@ -42,6 +46,65 @@ def test_login(driver):
     
     logger.info(driver.current_url)
 
+
+@pytest.mark.parametrize(
+        "logged_in_driver",[{"login": "administrator@testarena.pl", "password": "sumXQQ72$L"}], indirect=True)
+def test_create_new_directory(logged_in_driver):
+    driver = logged_in_driver
+
+    logger = get_logger(__name__)
+
+    fake = Faker()
+    dir_name = fake.name().replace(' ', '_')
+    menu = driver.find_element(By.CLASS_NAME, "menu")
+    elems = menu.find_elements(By.TAG_NAME, "a")
+    for item in elems:
+        if "Projekt" in item.text:
+            # item.get_attribute('href')
+            item.click()
+            break
+
+    try:
+        WebDriverWait(driver, 30).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "collapse"))
+        )
+    except PageNotLoaded as e:
+        logger.error("Exception occurred: ", e)
+
+    buttons = driver.find_element(By.CLASS_NAME, "button_link_ul")
+    attachement = buttons.find_elements(By.TAG_NAME, "li")
+    attachement[1].click()
+    attachement[1].find_elements(By.TAG_NAME, "li")[0].click()
+    
+    driver.switch_to.window(driver.window_handles[1])
+
+    try:
+        WebDriverWait(driver, 30).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "iconDirectory"))
+        )
+    except PageNotLoaded as e:
+        logger.error("Exception occurred: ", e)
+
+    driver.find_element(By.ID, "createDirectoryButton").click()
+
+    try:
+        WebDriverWait(driver, 30).until(
+            EC.presence_of_element_located((By.ID, "directoryName"))
+        )
+    except PageNotLoaded as e:
+        logger.error("Exception occurred: ", e)
+
+    driver.find_element(By.ID, "directoryName").send_keys(dir_name)
+    driver.find_element(By.ID, "createDirectoryPopupButton").click()
+    
+    list_of_files = driver.find_element(By.TAG_NAME, "tbody")
+    files = list_of_files.find_elements(By.TAG_NAME, "tr")
+    for file in files:
+        logger.warning(file.text)
+    
+    assert any(dir_name in file.text for file in files), "File not created successfuly"
+
+
 @pytest.mark.parametrize("driver", ["http://demo.testarena.pl/logowanie"], indirect=True)
 def test_login_incorrect_data(driver):
     logger = get_logger(__name__)
@@ -49,7 +112,7 @@ def test_login_incorrect_data(driver):
     incorrect_logins_count = 0
     possible_urls = ["http://demo.testarena.pl/logowanie", "http://demo.testarena.pl/zaloguj"]
 
-    with open("tests/data/login_data.json", "r") as login_data:
+    with open("tests/data/fake_login_data.json", "r") as login_data:
         logins = json.load(login_data)
         
     for item in logins:
