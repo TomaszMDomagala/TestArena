@@ -1,0 +1,18 @@
+{
+    "1": {
+        "login": "text",
+        "password": "haslo"
+    },
+    "2": {
+        "login": "administrator@testarena.pl",
+        "password": "password"
+    },
+    "3": {
+        "login": "test@testarena.pl",
+        "password": "password"
+    },
+    "4": {
+        "login": "user@testarena.pl",
+        "password": "sumXQQ72$L"
+    }
+}
