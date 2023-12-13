@@ -8,7 +8,6 @@ from selenium.webdriver.support import expected_conditions as EC
 from faker import Faker
 
 from resources.logger import get_logger
-from resources.utils import extract_data, get_unique_string
 from resources.browser import (
     logged_in_driver,
     wait_until_element_is_loaded,
@@ -18,7 +17,6 @@ from resources.exceptions import PageNotLoaded
 
 import pytest
 import time
-import json
 
 
 @pytest.mark.parametrize(

@@ -9,14 +9,9 @@ from selenium.webdriver.support import expected_conditions as EC
 from typing import Union
 
 from resources.logger import get_logger
-from resources.utils import extract_data
-from resources.exceptions import IncorectLoginData, PageNotLoaded
+from resources.exceptions import PageNotLoaded
 
 import pytest
-import re
-import sys
-import time
-
 
 logger = get_logger(__name__)
 
