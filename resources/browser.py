@@ -3,7 +3,6 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.support.wait import WebDriverWait
-from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support import expected_conditions as EC
 
 from typing import Union
@@ -12,6 +11,7 @@ from resources.logger import get_logger
 from resources.exceptions import PageNotLoaded
 
 import pytest
+import time
 
 logger = get_logger(__name__)
 
@@ -52,6 +52,14 @@ def find_element_in_menu(driver: webdriver.Firefox, element: str) -> Union[None,
             item.click()
             return
     return False
+
+
+def insert_data_to_form(driver: webdriver.Firefox, locator: str, element: str, data: str) -> None:
+    form = driver.find_element(locator, element)
+    form.click()
+    form.send_keys(data)
+    time.sleep(0.5)
+    form.send_keys(Keys.RETURN)
 
 
 def wait_until_element_is_loaded(

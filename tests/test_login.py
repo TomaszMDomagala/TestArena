@@ -1,14 +1,9 @@
 from selenium import webdriver
-from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support.wait import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 
 from resources.logger import get_logger
 from resources.utils import extract_data
 from resources.browser import driver, wait_until_element_is_loaded
-from resources.exceptions import PageNotLoaded
 
 import pytest
 import json
