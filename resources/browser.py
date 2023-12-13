@@ -54,12 +54,25 @@ def find_element_in_menu(driver: webdriver.Firefox, element: str) -> Union[None,
     return False
 
 
-def insert_data_to_form(driver: webdriver.Firefox, locator: str, element: str, data: str) -> None:
+def insert_data_to_form(
+    driver: webdriver.Firefox, locator: str, element: str, data: str
+) -> None:
     form = driver.find_element(locator, element)
     form.click()
     form.send_keys(data)
     time.sleep(0.5)
     form.send_keys(Keys.RETURN)
+
+
+def insert_data_to_login(driver: webdriver.Firefox, login: str, password: str) -> None:
+    email_input = driver.find_element(By.ID, "email")
+    email_input.clear()
+    email_input.send_keys(login)
+    pass_input = driver.find_element(By.ID, "password")
+    pass_input.clear()
+    pass_input.send_keys(password)
+
+    driver.find_element(By.ID, "login").click()
 
 
 def wait_until_element_is_loaded(
