@@ -2,13 +2,13 @@ from resources.logger import get_logger
 
 logger = get_logger(__name__)
 
-class IncorectLoginData(Exception):
 
+class IncorectLoginData(Exception):
     def __init__(self, login: list, password: list):
         self.login = login
         self.password = password
         self.log_error()
-    
+
     def log_error(self):
         if len(self.login) != 1:
             logger.error(f"{self.login}")
@@ -19,6 +19,5 @@ class IncorectLoginData(Exception):
 
 
 class PageNotLoaded(Exception):
-
     def __init__(self):
         logger.error("Page was not loaded properly")

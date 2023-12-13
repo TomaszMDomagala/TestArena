@@ -41,16 +41,12 @@ def logged_in_driver(request):
     with webdriver.Firefox(options=options) as driver:
         driver.get("http://demo.testarena.pl/logowanie")
         email_input = driver.find_element(By.ID, "email")
-        email_input.send_keys(request.param['login'])
+        email_input.send_keys(request.param["login"])
         pass_input = driver.find_element(By.ID, "password")
-        pass_input.send_keys(request.param['password'])
+        pass_input.send_keys(request.param["password"])
         driver.find_element(By.ID, "login").click()
         yield driver
         driver.quit()
-
-
-def form_input_data(driver: webdriver.Firefox, element: str, in_text: str):
-    driver.find_element(By.ID, element).send_keys(in_text + Keys.RETURN)
 
 
 def find_element_in_menu(driver: webdriver.Firefox, element: str) -> Union[None, bool]:
@@ -62,8 +58,10 @@ def find_element_in_menu(driver: webdriver.Firefox, element: str) -> Union[None,
             return
     return False
 
+
 def wait_until_element_is_loaded(
-        driver: webdriver.Firefox, timeout: int, locator: str, element: str) -> bool:
+    driver: webdriver.Firefox, timeout: int, locator: str, element: str
+) -> bool:
     try:
         WebDriverWait(driver, timeout).until(
             EC.presence_of_element_located((locator, element))
