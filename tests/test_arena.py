@@ -1,17 +1,14 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
 
 from faker import Faker
 
-from resources.logger import get_logger
 from resources.browser import (
     logged_in_driver,
     insert_data_to_form,
     wait_until_element_is_loaded,
     find_element_in_menu,
 )
-from resources.exceptions import PageNotLoaded
 
 import pytest
 
@@ -67,12 +64,10 @@ def test_create_new_directory(logged_in_driver):
 
     # switch to new window and wait until loaded
     driver.switch_to.window(driver.window_handles[1])
-
     wait_until_element_is_loaded(driver, 10, By.CLASS_NAME, "iconDirectory")
 
     # find create new directory button
     driver.find_element(By.ID, "createDirectoryButton").click()
-
     wait_until_element_is_loaded(driver, 10, By.ID, "directoryName")
 
     # insert name of directory and create
